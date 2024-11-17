@@ -1,5 +1,6 @@
 ---
 layout: default
 ---
-# {{site.title}}
-{{site.description}}
+# NopeNopeGuy
+
+Just a normal Android Builder/Tinkerer
