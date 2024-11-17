@@ -85,3 +85,15 @@ zstd        37%       52G         137G         143G
 ```
 
 You may also be able to reduce the space used even more if you use dwarfs, but that is left as an exercise for the reader.
+
+## Working on Low Ram Machines
+
+AOSP needs atleast 32GiB of RAM to build, but we can reduce that requirement to 8GB using a lot of zram, here's how to do it:
+
+`sudo modprobe zram` (If it isn't loaded already)\
+`sudo swapoff /dev/zram0` (If you have zram already, else skip this)\
+`sudo zramctl /dev/zram0 -s 32G` (Reduce this to 24G if you have a 16GB memory system)\
+`sudo mkswap /dev/zram0`\
+`sudo swapon /dev/zram0`
+
+Note: Disk swap is not recommended as it will be **REALLY** Slow
