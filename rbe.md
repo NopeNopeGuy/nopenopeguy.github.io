@@ -15,8 +15,8 @@ Note: You will need fast (40Mbps minimum) internet and atleast 20GB per build.
 
 Installing all the dependencies:
 
-`git clone https://aur.archlinux.org/yay-bin.git`
-`cd yay-bin && makepkg -si`
+`git clone https://aur.archlinux.org/yay-bin.git`\
+`cd yay-bin && makepkg -si`\
 `yay -S lineageos-devel`
 
 This will download all the dependencies needed and also install an AUR helper. Skip installing the aur helper if you've already installed one.
@@ -25,7 +25,7 @@ This will download all the dependencies needed and also install an AUR helper. S
 
 I'll be using LineageOS as an example but it should work with most roms out there.
 
-`repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --git-lfs --depth=1`
+`repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --git-lfs --depth=1`\
 `repo sync -j$(nproc --all) -c`
 
 See `Tips and Tricks` to reduce storage utilization.
@@ -48,13 +48,13 @@ export NINJA_REMOTE_NUM_JOBS=48
 export RBE_JAVA_POOL=default
 ```
 
-R8 currently doesn't work on BuildBuddy, I am working on a fix but that'll take time, so until then R8 will be run locally.
+R8 currently doesn't work on BuildBuddy, I am working on a fix but that'll take time, so until then R8 will be run locally.\
 I recommend putting this in your `build/envsetup.sh` so you don't have copy this everytime
 
 ## Building
 
-You should just be able to build normally after this:
-`breakfast (your device)`
+You should just be able to build normally after this:\
+`breakfast (your device)`\
 `mka bacon -j$(nproc --all)`
 
 That should be all you need to do in order to get a successful build, contact me on @NopeNopeGuy on telegram if you have any issues
@@ -64,14 +64,14 @@ That should be all you need to do in order to get a successful build, contact me
 
 ## Reducing Storage Requirements
 
-You should be able to reduce the space used by using BTRFS compression. Create a BTRFS filesystem using:
+You should be able to reduce the space used by using BTRFS compression. Create a BTRFS filesystem using:\
 `mkfs.btrfs /dev/(your storage partition here)`
 
-Mount your btrfs partition using these options for the best compression
+Mount your btrfs partition using these options for the best compression: \
 `mount /dev/(your storage partition) /(where you want it mounted) -o defaults,noatime,compress-force=zstd,space_cache=v2,commit=120`
 
-Here is a reference fstab entry:
-`/dev/sda1 /home/user/LineageOS          btrfs   defaults,noatime,compress-force=zstd,space_cache=v2,commit=120 0 0`
+Here is a reference fstab entry:\
+`/dev/sda1 /home/user/LineageOS btrfs defaults,noatime,compress-force=zstd,space_cache=v2,commit=120 0 0`
 
 Using this you should be able to reduce the space required by around 50% using this (Around 100GB with a full build).
 
