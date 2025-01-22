@@ -48,6 +48,8 @@ export NINJA_REMOTE_NUM_JOBS=48
 export RBE_JAVA_POOL=default
 ```
 
+You can increase NINJA_REMOTE_NUM_JOBS to 500 and even more if you have the ram for it, setting it to 128 should work fine completely for 16GB ram devices.
+
 R8 currently doesn't work on BuildBuddy, I am working on a fix but that'll take time, so until then R8 will be run locally.\
 I recommend putting this in your `build/envsetup.sh` so you don't have copy this everytime
 
