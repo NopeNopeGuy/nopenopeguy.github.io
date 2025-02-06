@@ -56,7 +56,7 @@ repo sync -j$(nproc --all) -c
 
 ### 2. Download and Configure `reclient`
 
-1.  **Download:** Download the `reclient` package from [this link](https://chrome-infra-packages.appspot.com/p/infra/rbe/client/linux-amd64/+re_client_version:98046de5023ee81b5a8a5ac0577b9e84cd27f386).  This is a pre-built version of Google's `reclient` tool.
+1.  **Download:** Download the `reclient` package from [this link](https://chrome-infra-packages.appspot.com/p/infra/rbe/client/linux-amd64/+/re_client_version:8c46330a582b7bed5b6d00e8c640b93ddd5f507c).  This is a pre-built version of Google's `reclient` tool.
 2.  **Extract:** Extract the downloaded archive to a directory within your ROM's source tree.  For example, you could create a directory called `rbe` in the root of your AOSP directory and extract it there.  It is important to keep the extracted directory structure.
 3.  **Note Path:**  Remember the *relative* path from your AOSP root to this directory (e.g., `rbe`) or the absolute path.
 
