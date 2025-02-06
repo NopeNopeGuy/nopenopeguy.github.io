@@ -49,10 +49,14 @@ export RBE_TURBINE_EXEC_STRATEGY=remote_local_fallback
 export RBE_SIGNAPK_EXEC_STRATEGY=remote_local_fallback
 export RBE_CXX_LINKS_EXEC_STRATEGY=remote_local_fallback
 export RBE_ABI_LINKER_EXEC_STRATEGY=remote_local_fallback
+export RBE_ABI_DUMPER_EXEC_STRATEGY=remote_local_fallback
 export RBE_CLANG_TIDY_EXEC_STRATEGY=remote_local_fallback
 export RBE_METALAVA_EXEC_STRATEGY=remote_local_fallback
+export RBE_LINT_EXEC_STRATEGY=remote_local_fallback
 export RBE_CLANG_TIDY=1
 export RBE_ABI_LINKER=1
+export RBE_ABI_DUMPER=1
+export RBE_LINT=1
 export RBE_JAVAC=1
 export RBE_R8=1
 export RBE_D8=1
@@ -65,6 +69,7 @@ export RBE_SIGNAPK=1
 export NINJA_REMOTE_NUM_JOBS=72
 export RBE_JAVA_POOL=default
 export RBE_METALAVA_POOL=default
+export RBE_LINT_POOL=default
 ```
 
 Most of these options (except R8, D8, JAVAC, CXX) are undocumented and were found by digging through AOSP code. Thanks Google.
