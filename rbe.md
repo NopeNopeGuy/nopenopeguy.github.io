@@ -11,7 +11,7 @@ Remote Build Execution (RBE) allows you to leverage powerful remote servers to s
 **Requirements:**
 
 *   Fast internet connection (at least 40 Mbps).
-*   Sufficient storage space (at least 20GB *per build*). BTRFS with compression is highly recommended (see Tips and Tricks).
+*   Sufficient storage space at least 100GB. BTRFS with compression is highly recommended (see Tips and Tricks).
 *   Arch Linux (or a similar distribution). WSL2 *may* work, but is not officially tested.
 
 ## Setup
