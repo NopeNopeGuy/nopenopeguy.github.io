@@ -41,8 +41,14 @@ See `Tips and Tricks` to reduce storage utilization.
 
 ### Setting it up locally
 
+- Download [this](https://chrome-infra-packages.appspot.com/p/infra/rbe/client/linux-amd64/+re_client_version:98046de5023ee81b5a8a5ac0577b9e84cd27f386)
+- Extract it in your rom folder under a subdirectory somewhere
+- Note down the path.
+- Add those environment variables
+
 ```
 export USE_RBE=1
+export RBE_DIR=the/path/to/the/directory/here/relative/to/the/AOSP/directory/or/absolute/path
 export RBE_use_rpc_credentials=false
 export RBE_service=the_address_you_noted_down_here:443
 export RBE_remote_headers='the thing you copied'
