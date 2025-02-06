@@ -32,10 +32,20 @@ See `Tips and Tricks` to reduce storage utilization.
 
 ## Setting up RBE
 
+### Getting BuildBuddy's API Key
+
+- Go to buildbuddy.io and Sign IN
+- Go to the quickstart option in the dashboard
+- Copy everything after the `--remote_header=` part
+- Note down the address in the `--bes_backend` part. You only need to remember the things after `grpcs://`
+
+### Setting it up locally
+
 ```
 export USE_RBE=1
 export RBE_use_rpc_credentials=false
-export RBE_service=remote.buildbuddy.io:443
+export RBE_service=the_address_you_noted_down_here:443
+export RBE_remote_headers='the thing you copied'
 export RBE_service_no_auth=true
 export RBE_use_unified_downloads=true
 export RBE_use_unified_uploads=true
