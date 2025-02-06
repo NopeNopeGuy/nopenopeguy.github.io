@@ -1,168 +1,236 @@
 ---
 layout: default
 ---
-# Building Android using Buildbuddy RBE
+
+# Building Android with BuildBuddy Remote Build Execution (RBE)
 
 ## Introduction
 
-RBE stands for Remote Build Execution, android is buildable using Google's RBE service but we are not just limited to that, in this guide you'll learn how to use other RBE services for AOSP Building.
+Remote Build Execution (RBE) allows you to leverage powerful remote servers to significantly speed up your Android builds. While Google's RBE service is commonly used, this guide focuses on using [BuildBuddy](https://buildbuddy.io/), a flexible alternative.  We'll walk through setting up RBE with LineageOS as an example, but the principles apply to most AOSP-based ROMs.
 
-This guide will assume that you are using Archlinux, it may or may not work with WSL2.
+**Requirements:**
 
-Note: You will need fast (40Mbps minimum) internet and atleast 20GB per build. 
+*   Fast internet connection (at least 40 Mbps).
+*   Sufficient storage space (at least 20GB *per build*). BTRFS with compression is highly recommended (see Tips and Tricks).
+*   Arch Linux (or a similar distribution). WSL2 *may* work, but is not officially tested.
 
 ## Setup
 
-Installing all the dependencies:
+### 1. Install Dependencies
 
-`git clone https://aur.archlinux.org/yay-bin.git`\
-`cd yay-bin && makepkg -si`\
-`yay -S lineageos-devel`
+Install the necessary build tools and an AUR helper (if you don't have one already):
 
-This will download all the dependencies needed and also install an AUR helper. Skip installing the aur helper if you've already installed one.
-
-## Cloning LineageOS
-
-I'll be using LineageOS as an example but it should work with most roms out there.
-
-`repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --git-lfs --depth=1`\
-`repo sync -j$(nproc --all) -c`
-
-See `Tips and Tricks` to reduce storage utilization.
-
-## Setting up RBE
-
-### Getting BuildBuddy's API Key
-
-- Go to buildbuddy.io and Sign IN
-- Go to the quickstart option in the dashboard
-- Copy everything after the `--remote_header=` part
-- Note down the address in the `--bes_backend` part. You only need to remember the things after `grpcs://`
-
-### Setting it up locally
-
-- Download [this](https://chrome-infra-packages.appspot.com/p/infra/rbe/client/linux-amd64/+re_client_version:98046de5023ee81b5a8a5ac0577b9e84cd27f386)
-- Extract it in your rom folder under a subdirectory somewhere
-- Note down the path.
-- Add those environment variables
-
+```bash
+git clone https://aur.archlinux.org/yay-bin.git
+cd yay-bin
+makepkg -si
+yay -S lineageos-devel
 ```
-export USE_RBE=1
-export RBE_DIR=the/path/to/the/directory/here/relative/to/the/AOSP/directory/or/absolute/path
-export RBE_use_rpc_credentials=false
-export RBE_service=the_address_you_noted_down_here:443
-export RBE_remote_headers='the thing you copied'
-export RBE_service_no_auth=true
+
+### 2. Clone LineageOS
+
+Initialize and sync the LineageOS source code (or your chosen ROM):
+
+```bash
+repo init -u https://github.com/LineageOS/android.git -b lineage-21.0 --git-lfs --depth=1
+repo sync -j$(nproc --all) -c
+```
+
+**Tip:**  See the "Tips and Tricks" section for ways to reduce storage usage. Using `--depth=1` in the `repo init` significantly reduces the initial download size.
+
+## Setting up RBE with BuildBuddy
+
+### 1. Obtain Your BuildBuddy API Key
+
+1.  **Sign In:** Go to [buildbuddy.io](https://buildbuddy.io/) and sign in with your Google or GitHub account.
+2.  **Quickstart:** Navigate to the "Quickstart" section in your BuildBuddy dashboard.
+3.  **Copy API Key:**  You'll see a command similar to this:
+
+    ```bash
+    build --bes_backend=grpcs://your-instance.buildbuddy.io 
+    build --remote_header=x-buildbuddy-api-key=xxx ...
+    ```
+
+    *   Copy the entire string *after* `--remote_header=`. This is your API key.  It will look like `x-buildbuddy-api-key=xxx`.
+    *   Note the address after `--bes_backend=`. You only need the part *after* `grpcs://` and before `:443`, e.g., `your-instance.buildbuddy.io`.
+
+### 2. Download and Configure `reclient`
+
+1.  **Download:** Download the `reclient` package from [this link](https://chrome-infra-packages.appspot.com/p/infra/rbe/client/linux-amd64/+re_client_version:98046de5023ee81b5a8a5ac0577b9e84cd27f386).  This is a pre-built version of Google's `reclient` tool.
+2.  **Extract:** Extract the downloaded archive to a directory within your ROM's source tree.  For example, you could create a directory called `rbe` in the root of your AOSP directory and extract it there.  It is important to keep the extracted directory structure.
+3.  **Note Path:**  Remember the *relative* path from your AOSP root to this directory (e.g., `rbe`) or the absolute path.
+
+### 3. Set Environment Variables
+
+These environment variables configure `reclient` to use BuildBuddy.  It's highly recommended to add these to your `build/envsetup.sh` file so they are automatically set each time you initialize your build environment.
+
+```bash
+# --- Enable RBE and General Settings ---
+export USE_RBE=1                                      
+export RBE_DIR="path/to/reclient"                      # Path to the extracted reclient directory (relative or absolute)
+export NINJA_REMOTE_NUM_JOBS=72                        # Number of parallel remote jobs (adjust based on your RAM, buildbuddy has 80 CPU cores in the free tier)
+
+# --- BuildBuddy Connection Settings ---
+export RBE_service="your-instance.buildbuddy.io"        # BuildBuddy instance address (without grpcs:// or port)
+export RBE_remote_headers="x-buildbuddy-api-key=xxx"    # Your BuildBuddy API key
+export RBE_use_rpc_credentials=false                   
+export RBE_service_no_auth=true                       
+
+# --- Unified Downloads/Uploads (Recommended) ---
 export RBE_use_unified_downloads=true
 export RBE_use_unified_uploads=true
-export RBE_R8_EXEC_STRATEGY=local
-export RBE_CXX_EXEC_STRATEGY=remote_local_fallback
+
+# --- Execution Strategies (remote_local_fallback is generally best) ---
+export RBE_R8_EXEC_STRATEGY=remote_local_fallback
 export RBE_D8_EXEC_STRATEGY=remote_local_fallback
 export RBE_JAVAC_EXEC_STRATEGY=remote_local_fallback
 export RBE_JAR_EXEC_STRATEGY=remote_local_fallback
 export RBE_ZIP_EXEC_STRATEGY=remote_local_fallback
 export RBE_TURBINE_EXEC_STRATEGY=remote_local_fallback
 export RBE_SIGNAPK_EXEC_STRATEGY=remote_local_fallback
+export RBE_CXX_EXEC_STRATEGY=remote_local_fallback
 export RBE_CXX_LINKS_EXEC_STRATEGY=remote_local_fallback
 export RBE_ABI_LINKER_EXEC_STRATEGY=remote_local_fallback
 export RBE_ABI_DUMPER_EXEC_STRATEGY=remote_local_fallback
 export RBE_CLANG_TIDY_EXEC_STRATEGY=remote_local_fallback
 export RBE_METALAVA_EXEC_STRATEGY=remote_local_fallback
 export RBE_LINT_EXEC_STRATEGY=remote_local_fallback
-export RBE_CLANG_TIDY=1
-export RBE_ABI_LINKER=1
-export RBE_ABI_DUMPER=1
-export RBE_LINT=1
-export RBE_JAVAC=1
+
+# --- Enable RBE for Specific Tools ---
 export RBE_R8=1
 export RBE_D8=1
-export RBE_METALAVA=1
+export RBE_JAVAC=1
+export RBE_JAR=1
 export RBE_ZIP=1
 export RBE_TURBINE=1
-export RBE_JAR=1
-export RBE_CXX_LINKS=1
 export RBE_SIGNAPK=1
-export NINJA_REMOTE_NUM_JOBS=72
+export RBE_CXX_LINKS=1
+export RBE_CXX=1
+export RBE_ABI_LINKER=1
+export RBE_ABI_DUMPER=1
+export RBE_CLANG_TIDY=1
+export RBE_METALAVA=1
+export RBE_LINT=1
+
+# --- Resource Pools ---
 export RBE_JAVA_POOL=default
 export RBE_METALAVA_POOL=default
 export RBE_LINT_POOL=default
 ```
 
-Most of these options (except R8, D8, JAVAC, CXX) are undocumented and were found by digging through AOSP code. Thanks Google.
+*   **`USE_RBE=1`**: Enables RBE.
+*   **`RBE_DIR`**: The path to your extracted `reclient` directory.
+*   **`RBE_service`**: The BuildBuddy instance address (without `grpcs://` or the port).
+*   **`RBE_remote_headers`**: Your BuildBuddy API key.
+*   **`*_EXEC_STRATEGY`**:  Controls how different build steps are handled. `remote_local_fallback` means try remotely first, then fall back to local execution if the remote execution fails.
+*   **`RBE_*=1`**: Enables RBE for specific build tools.
+*   **`NINJA_REMOTE_NUM_JOBS`**:  The number of parallel jobs to run remotely. Start with 72 and increase if you have more RAM.  128 should be safe for 16GB RAM systems.  You can go higher (e.g., 500) if you have significantly more RAM.
+*   **`RBE_*_POOL`**: Specifies the resource pool to use. The `default` pool is usually sufficient.
 
-You can increase NINJA_REMOTE_NUM_JOBS to 500 and even more if you have the ram for it, setting it to 128 should work fine completely for 16GB ram devices.
+**Important Notes:**
 
-R8 currently doesn't work on BuildBuddy (just the remote build part, remote caching is working fine!), I have submitted an issue to reclient but haven't gotten a response yet.\
-I recommend putting this in your `build/envsetup.sh` so you don't have copy this everytime
+*   Currently, full remote execution of R8 is not working with BuildBuddy, though remote caching *is* working.  An issue has been submitted to the `reclient` project.
+*   Many of these options are not officially documented by Google and were discovered through AOSP source code analysis.
 
 ## Building
 
-You should just be able to build normally after this:\
-`breakfast (your device)`\
-`mka bacon -j$(nproc --all)`
+Once you've set up RBE, you can build your ROM as usual:
 
-That should be all you need to do in order to get a successful build, contact me on @NopeNopeGuy on telegram if you have any issues
+```bash
+source build/envsetup.sh
+breakfast your_device  # Replace 'your_device' with your device codename
+mka bacon -j$(nproc --all)
+```
 
+The `mka` command is the recommended way to build.  `-j$(nproc --all)` uses all available CPU cores for the local build steps. RBE will handle the remote execution according to your configuration.
 
-# Tips and Tricks
+## Tips and Tricks
 
-## Reducing Storage Requirements
+### 1. Reducing Storage Requirements with BTRFS Compression
 
-You should be able to reduce the space used by using BTRFS compression. Create a BTRFS filesystem using:\
-`mkfs.btrfs /dev/(your storage partition here)`
+BTRFS compression can dramatically reduce the storage space needed for AOSP builds.
 
-Mount your btrfs partition using these options for the best compression: \
-`mount /dev/(your storage partition) /(where you want it mounted) -o defaults,noatime,compress-force=zstd,space_cache=v2,commit=120`
+1.  **Create a BTRFS Filesystem:**
 
-Here is a reference fstab entry:\
-`/dev/sda1 /home/user/LineageOS btrfs defaults,noatime,compress-force=zstd,space_cache=v2,commit=120 0 0`
+    ```bash
+    sudo mkfs.btrfs /dev/your_storage_partition  # Replace with your actual partition
+    ```
 
-Using this you should be able to reduce the space required by around 50% using this (Around 100GB with a full build).
+2.  **Mount with Compression:**
 
-Stats:
+    ```bash
+    sudo mount /dev/your_storage_partition /mnt/aosp -o defaults,noatime,compress-force=zstd,space_cache=v2,commit=120
+    ```
+    Replace `/mnt/aosp` with your desired mount point.
+
+3.  **fstab Entry (Optional):**  For persistent mounting, add a line to your `/etc/fstab`:
+
+    ```
+    /dev/your_storage_partition /mnt/aosp btrfs defaults,noatime,compress-force=zstd,space_cache=v2,commit=120 0 0
+    ```
+
+**Benefits:** This can reduce storage usage by around 50% (e.g., a 195GB build might only take up 101GB).
+
+**Example Compression Statistics:**
 ```
 Processed 1682984 files, 1779448 regular extents (1841256 refs), 975364 inline.
-Type       Perc     Disk Usage   Uncompressed Referenced  
-TOTAL       54%      101G         186G         195G       
-none       100%       48G          48G          51G       
-zstd        37%       52G         137G         143G       
+Type       Perc     Disk Usage   Uncompressed Referenced
+TOTAL       54%      101G         186G         195G
+none       100%       48G          48G          51G
+zstd        37%       52G         137G         143G
 ```
+**Note:** You *might* be able to achieve even greater compression with `dwarfs`, but this is more complex to set up.
 
-You may also be able to reduce the space used even more if you use dwarfs, but that is left as an exercise for the reader.
+### 2. Working on Low-RAM Machines with zram
 
-## Working on Low Ram Machines
+AOSP builds typically require 32GB+ of RAM.  You can use `zram` (compressed RAM) to build on systems with less physical RAM (e.g., 8GB).
 
-AOSP needs atleast 32GiB of RAM to build, but we can reduce that requirement to 8GB using a lot of zram, here's how to do it:
+1.  **Load zram Module:**
 
-`sudo modprobe zram` (If it isn't loaded already)\
-`sudo swapoff /dev/zram0` (If you have zram already, else skip this)\
-`sudo zramctl /dev/zram0 -s 48G` (Reduce this to 32G if you have a 16GB memory system)\
-`sudo mkswap /dev/zram0`\
-`sudo swapon /dev/zram0`
+    ```bash
+    sudo modprobe zram
+    ```
 
-Note: Disk swap is not recommended as it will be **REALLY** Slow
+2.  **Configure zram:**
 
-# Results
+    ```bash
+    sudo swapoff /dev/zram0  # Only if you have existing zram
+    sudo zramctl /dev/zram0 -s 48G  # 48GB for 8GB RAM systems, 32GB for 16GB RAM
+    sudo mkswap /dev/zram0
+    sudo swapon /dev/zram0
+    ```
 
-## 16GB Ram, 8 cores (Credits to @armdebug)
+**Important:**  Using disk swap (a swap file or partition) is *not* recommended. It will be extremely slow.  zram is significantly faster because it uses compressed RAM.
 
-### Specs:
-![specs](https://github.com/user-attachments/assets/4cb45f91-d131-4c9f-ac59-b43dda3b2629)
+## Results
 
-### Build Time with just R8,D8,CXX,JAVAC remote build and caching:
-![results1](https://github.com/user-attachments/assets/b42aec9f-89c8-4f87-b7bc-3e372713eab8)
+These results demonstrate the potential build time improvements with RBE.
 
-### Build Time with everything cached except metalava:
-![result2](https://github.com/user-attachments/assets/4a65667b-876d-4d28-b3ba-f3611414bda8)
+### System 1: 16GB RAM, 8 Cores
 
-## 8GB Ram, 4 cores
+*   **Specs:** AMD EPYC 9634 8-Core, 16GB RAM, KVM Server
 
-### Specs:
-![specs2](https://github.com/user-attachments/assets/413a8def-2fe5-4d49-991b-0422fdbce007)
+    ![specs](https://github.com/user-attachments/assets/4cb45f91-d131-4c9f-ac59-b43dda3b2629)\
+    *System 1 Specifications (fastfetch output): AMD EPYC 9634 8-Core CPU, 16GB RAM, KVM Server, Debian GNU/Linux 12 (bookworm).*
+*   **Build Time (R8, D8, CXX, JAVAC remote build and caching):** ~ 2
 
+    ![results1](https://github.com/user-attachments/assets/b42aec9f-89c8-4f87-b7bc-3e372713eab8)\
+    *Image showing build time of approximately 2 hour 30 minutes with R8, D8, CXX, and JAVAC using remote build and caching.*
+*   **Build Time (Everything cached except metalava):** ~ 30 minutes
 
-### Build Time with just R8,D8,CXX,JAVAC remote build and caching:
-Greater than 5 hours (source: trust me)
+    ![result2](https://github.com/user-attachments/assets/4a65667b-876d-4d28-b3ba-f3611414bda8)\
+    *System 1 Build Time (R8, D8, CXX, JAVAC): 1 hour 27 minutes 43.496 seconds. RBE Stats: down 33.48 GB, up 14.86 GB, 90889 cache hits, 4289 remote executions, 121 local fallbacks.*
 
-### Build Time with everything cached (no exceptions):
-4 hours 8 mins (source: trust me)
+### System 2: 8GB RAM, 4 Cores
+
+*   **Specs:** Intel Core i5-6500T, 8GB RAM, 48GB ZRAM, BTRFS, CachyOS
+
+    ![specs2](https://github.com/user-attachments/assets/413a8def-2fe5-4d49-991b-0422fdbce007)
+    *System 2 Specifications (fastfetch output): Intel Core i5-6500T CPU, 8GB RAM, 48GB ZRAM, CachyOS x86_64, BTRFS filesystem.*
+
+*   **Build Time (R8, D8, CXX, JAVAC remote build and caching):**  > 5 hours
+*   **Build Time (Everything cached):** ~ 4 hours 8 minutes
+
+## Contact
+
+If you encounter any issues, please contact @NopeNopeGuy on Telegram.
