@@ -219,7 +219,7 @@ These results demonstrate the potential build time improvements with RBE.
 *   **Build Time (Everything cached except metalava):**
 
     ![result2](https://github.com/user-attachments/assets/4a65667b-876d-4d28-b3ba-f3611414bda8)\
-    *System 1 Build Time (R8, D8, CXX, JAVAC): 1 hour 27 minutes 43.496 seconds. RBE Stats: down 33.48 GB, up 14.86 GB, 90889 cache hits, 4289 remote executions, 121 local fallbacks.*
+    *System 1 Build Time (everything): 1 hour 27 minutes 43.496 seconds. RBE Stats: down 33.48 GB, up 14.86 GB, 90889 cache hits, 4289 remote executions, 121 local fallbacks.*
 
 ### System 2: 8GB RAM, 4 Cores
 
