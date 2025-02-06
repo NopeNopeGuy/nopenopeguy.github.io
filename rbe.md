@@ -11,7 +11,7 @@ Remote Build Execution (RBE) allows you to leverage powerful remote servers to s
 **Requirements:**
 
 *   Fast internet connection (at least 40 Mbps).
-*   Sufficient storage space at least 100GB. BTRFS with compression is highly recommended (see Tips and Tricks).
+*   Sufficient storage space (at least 100GB). BTRFS with compression is highly recommended (see Tips and Tricks).
 *   Arch Linux (or a similar distribution). WSL2 *may* work, but is not officially tested.
 
 ## Setup
@@ -52,7 +52,7 @@ repo sync -j$(nproc --all) -c
     ```
 
     *   Copy the entire string *after* `--remote_header=`. This is your API key.  It will look like `x-buildbuddy-api-key=xxx`.
-    *   Note the address after `--bes_backend=`. You only need the part *after* `grpcs://` and before `:443`, e.g., `your-instance.buildbuddy.io`.
+    *   Note the address after `--bes_backend=`. You only need the part *after* `grpcs://`, e.g., `your-instance.buildbuddy.io`.
 
 ### 2. Download and Configure `reclient`
 
