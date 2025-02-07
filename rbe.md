@@ -64,6 +64,8 @@ repo sync -j$(nproc --all) -c
 
 These environment variables configure `reclient` to use BuildBuddy.  It's highly recommended to add these to your `build/envsetup.sh` file so they are automatically set each time you initialize your build environment.
 
+**IMPORTANT SEE NOTES BEFORE YOU DO THIS**
+
 ```bash
 # --- Enable RBE and General Settings ---
 export USE_RBE=1                                      
