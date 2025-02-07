@@ -120,7 +120,7 @@ export RBE_LINT_POOL=default
 
 *   **`USE_RBE=1`**: Enables RBE.
 *   **`RBE_DIR`**: The path to your extracted `reclient` directory.
-*   **`RBE_service`**: The BuildBuddy instance address (without `grpcs://` or the port).
+*   **`RBE_service`**: The BuildBuddy instance address (without `grpcs://`, add the port 443).
 *   **`RBE_remote_headers`**: Your BuildBuddy API key.
 *   **`*_EXEC_STRATEGY`**:  Controls how different build steps are handled. `remote_local_fallback` means try remotely first, then fall back to local execution if the remote execution fails.
 *   **`RBE_*=1`**: Enables RBE for specific build tools.
