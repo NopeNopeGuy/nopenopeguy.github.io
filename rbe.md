@@ -71,7 +71,7 @@ export RBE_DIR="path/to/reclient"                      # Path to the extracted r
 export NINJA_REMOTE_NUM_JOBS=72                        # Number of parallel remote jobs (adjust based on your RAM, buildbuddy has 80 CPU cores in the free tier)
 
 # --- BuildBuddy Connection Settings ---
-export RBE_service="your-instance.buildbuddy.io"        # BuildBuddy instance address (without grpcs:// or port)
+export RBE_service="your-instance.buildbuddy.io:443"        # BuildBuddy instance address (without grpcs://, add the port 443)
 export RBE_remote_headers="x-buildbuddy-api-key=xxx"    # Your BuildBuddy API key
 export RBE_use_rpc_credentials=false                   
 export RBE_service_no_auth=true                       
