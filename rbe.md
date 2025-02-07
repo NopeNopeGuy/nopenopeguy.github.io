@@ -88,7 +88,7 @@ export RBE_JAR_EXEC_STRATEGY=remote_local_fallback
 export RBE_ZIP_EXEC_STRATEGY=remote_local_fallback
 export RBE_TURBINE_EXEC_STRATEGY=remote_local_fallback
 export RBE_SIGNAPK_EXEC_STRATEGY=remote_local_fallback
-export RBE_CXX_EXEC_STRATEGY=remote_local_fallback
+export RBE_CXX_EXEC_STRATEGY=remote_local_fallback    # Important see below.
 export RBE_CXX_LINKS_EXEC_STRATEGY=remote_local_fallback
 export RBE_ABI_LINKER_EXEC_STRATEGY=remote_local_fallback
 export RBE_ABI_DUMPER_EXEC_STRATEGY=    # Will make build slower, by a lot. Keeping this for documentation
@@ -129,6 +129,7 @@ export RBE_LINT_POOL=default
 
 **Important Notes:**
 
+*   Make sure to switch **`RBE_CXX_LINKS_EXEC_STRATEGY`** to **`local`** after your first build is done to reduce build times.
 *   Currently, full remote execution of R8 is not working with BuildBuddy, though remote caching *is* working.  An issue has been submitted to the `reclient` project.
 *   Many of these options are not officially documented by Google and were discovered through AOSP source code analysis.
 
