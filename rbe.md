@@ -130,7 +130,6 @@ export RBE_LINT_POOL=default
 **Important Notes:**
 
 *   Make sure to switch **`RBE_CXX_LINKS_EXEC_STRATEGY`** to **`local`** after your first build is done to reduce build times.
-*   Currently, full remote execution of R8 is not working with BuildBuddy, though remote caching *is* working.  An issue has been submitted to the `reclient` project.
 *   Many of these options are not officially documented by Google and were discovered through AOSP source code analysis.
 
 ## Building
