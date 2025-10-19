@@ -2,6 +2,8 @@
 layout: default
 ---
 
+# NOTE: THIS GUIDE IS OUTDATED. PLEASE USE THIS GUIDE INSTEAD: [FossOnTop](https://fosson.top/aosp/remote-build-execution/)
+
 # Building Android with BuildBuddy Remote Build Execution (RBE)
 
 ## Introduction
